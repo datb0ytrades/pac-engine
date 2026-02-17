@@ -1,0 +1,28 @@
+{
+  "name": "pac-signing-service",
+  "version": "1.0.0",
+  "description": "Microservicio de firma XAdES-BES para el PAC Engine de Panamá",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "node-forge": "^1.3.1",
+    "xml-crypto": "github:node-saml/xml-crypto"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.0",
+    "@types/node-forge": "^1.3.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

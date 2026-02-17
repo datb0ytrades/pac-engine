@@ -1,0 +1,20 @@
+{
+  "name": "pac-app-emisor",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@pac/shared-types": "file:../../packages/shared-types",
+    "@supabase/supabase-js": "^2.49.1",
+    "expo": "~52.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "~18.3.0",
+    "typescript": "~5.7.0"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "zod": "https://deno.land/x/zod@v3.23.8/mod.ts",
+    "fast-xml-parser": "npm:fast-xml-parser@4.5.1",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.49.1"
+  }
+}

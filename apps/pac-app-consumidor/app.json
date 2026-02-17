@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "PAC Consumidor",
+    "slug": "pac-app-consumidor",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "pac-consumidor",
+    "plugins": [
+      [
+        "expo-image-picker",
+        { "cameraPermission": "Permite acceder a la cámara para fotografiar recibos" }
+      ]
+    ]
+  }
+}

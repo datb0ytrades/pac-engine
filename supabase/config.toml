@@ -1,0 +1,34 @@
+# supabase/config.toml
+# Configuración del proyecto Supabase para el PAC Engine
+
+[project]
+id = "pac-engine"
+
+[api]
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+port = 54323
+
+# Edge Functions
+[functions.emit-document]
+verify_jwt = true
+
+[functions.get-document]
+verify_jwt = true
+
+[functions.cancel-document]
+verify_jwt = true
+
+[functions.generate-cafe-pdf]
+verify_jwt = true
+
+[functions.categorize-expense]
+verify_jwt = false

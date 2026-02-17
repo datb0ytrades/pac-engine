@@ -1,0 +1,9 @@
+{
+  "expo": {
+    "name": "PAC Emisor",
+    "slug": "pac-app-emisor",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "pac-emisor"
+  }
+}

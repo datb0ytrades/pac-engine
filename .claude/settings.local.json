@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(brew install:*)",
+      "Bash(pdftoppm:*)",
+      "Bash(npx jest:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.eideasy.com)",
+      "WebFetch(domain:snyk.io)",
+      "Bash(npm install:*)",
+      "WebFetch(domain:deepwiki.com)",
+      "WebFetch(domain:socket.dev)",
+      "Bash(npm view:*)",
+      "Bash(node -e:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(npm ls:*)"
+    ]
+  }
+}
