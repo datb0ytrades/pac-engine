@@ -4,9 +4,9 @@
 // GET /                    → Lista documentos con filtros y paginación
 // ============================================================================
 
-import { serve } from 'https://deno.land/std@0.208.0/http/server.ts';
+// Entry point: Deno.serve()
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
-import { errorResponse, NotFoundError, ValidationError } from '../_shared/errors.ts';
+import { errorResponse, NotFoundError, ValidationError, ForbiddenError } from '../_shared/errors.ts';
 import { verifyAuth } from '../_shared/auth.ts';
 import { createServiceClient } from '../_shared/supabase.ts';
 import type {
@@ -15,19 +15,33 @@ import type {
   DocumentListResponse,
 } from '../_shared/types.ts';
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   // CORS preflight
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
 
   try {
     // Verificar autenticación
-    const { organizationId } = await verifyAuth(req);
+    const { userId } = await verifyAuth(req);
     const supabase = createServiceClient();
     const url = new URL(req.url);
 
-    // Determinar si es GET por ID o listado
+    // Obtener org_id del perfil del usuario
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('org_id')
+      .eq('id', userId)
+      .single();
+
+    if (profileError || !profile?.org_id) {
+      throw new ForbiddenError('Usuario no asociado a ninguna organización');
+    }
+
+    const organizationId = profile.org_id as string;
+
+    // Determinar si es GET por ID, CUFE o listado
     const documentId = url.searchParams.get('id');
+    const cufe = url.searchParams.get('cufe');
 
     if (documentId) {
       // --- GET por ID ---
@@ -35,7 +49,26 @@ serve(async (req: Request) => {
         .from('documents')
         .select('*')
         .eq('id', documentId)
-        .eq('organization_id', organizationId)
+        .eq('org_id', organizationId)
+        .single();
+
+      if (error || !data) {
+        throw new NotFoundError('Documento no encontrado');
+      }
+
+      const detail = toDetailResponse(data as DocumentRecord);
+      return new Response(JSON.stringify(detail), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
+
+    if (cufe) {
+      // --- GET por CUFE ---
+      const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('cufe', cufe)
+        .eq('org_id', organizationId)
         .single();
 
       if (error || !data) {
@@ -61,7 +94,7 @@ serve(async (req: Request) => {
     let query = supabase
       .from('documents')
       .select('*')
-      .eq('organization_id', organizationId)
+      .eq('org_id', organizationId)
       .order('created_at', { ascending: false })
       .limit(limit + 1);
 

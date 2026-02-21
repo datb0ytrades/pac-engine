@@ -4,19 +4,20 @@
 // Anula un documento fiscal electrónico
 // ============================================================================
 
-import { serve } from 'https://deno.land/std@0.208.0/http/server.ts';
+// Entry point: Deno.serve()
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import {
   errorResponse,
   NotFoundError,
   ConflictError,
   ValidationError,
+  ForbiddenError,
 } from '../_shared/errors.ts';
 import { verifyAuth } from '../_shared/auth.ts';
 import { createServiceClient } from '../_shared/supabase.ts';
 import type { DocumentRecord, DocumentDetailResponse } from '../_shared/types.ts';
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   // CORS preflight
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
@@ -30,8 +31,21 @@ serve(async (req: Request) => {
     }
 
     // Verificar autenticación
-    const { organizationId } = await verifyAuth(req);
+    const { userId } = await verifyAuth(req);
     const supabase = createServiceClient();
+
+    // Obtener org_id del perfil del usuario
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('org_id')
+      .eq('id', userId)
+      .single();
+
+    if (profileError || !profile?.org_id) {
+      throw new ForbiddenError('Usuario no asociado a ninguna organización');
+    }
+
+    const organizationId = profile.org_id as string;
 
     // Parsear body
     const body = await req.json();
@@ -53,7 +67,7 @@ serve(async (req: Request) => {
       .from('documents')
       .select('*')
       .eq('id', documentId)
-      .eq('organization_id', organizationId)
+      .eq('org_id', organizationId)
       .single();
 
     if (findError || !existing) {

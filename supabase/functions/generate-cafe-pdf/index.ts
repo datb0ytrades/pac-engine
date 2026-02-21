@@ -1,40 +1,66 @@
 // ============================================================================
 // Edge Function: generate-cafe-pdf
-// GET /?id=<uuid>  → Genera o recupera el CAFE en PDF
+// GET /?id=<uuid> o ?cufe=<cufe>  → Genera o recupera el CAFE en PDF
 // ============================================================================
 
-import { serve } from 'https://deno.land/std@0.208.0/http/server.ts';
+// Entry point: Deno.serve()
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
-import { errorResponse, NotFoundError, ValidationError } from '../_shared/errors.ts';
+import { errorResponse, NotFoundError, ValidationError, ForbiddenError } from '../_shared/errors.ts';
 import { verifyAuth } from '../_shared/auth.ts';
 import { createServiceClient } from '../_shared/supabase.ts';
 import { generateCafePdf } from '../_shared/pdf.ts';
 import { storeCafePdf } from '../_shared/storage.ts';
 import type { DocumentRecord } from '../_shared/types.ts';
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   // CORS preflight
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
 
   try {
     // Verificar autenticación
-    const { organizationId } = await verifyAuth(req);
+    const { userId } = await verifyAuth(req);
     const supabase = createServiceClient();
     const url = new URL(req.url);
 
-    const documentId = url.searchParams.get('id');
-    if (!documentId) {
-      throw new ValidationError('Se requiere el parámetro id');
+    // Obtener org_id del perfil del usuario
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('org_id')
+      .eq('id', userId)
+      .single();
+
+    if (profileError || !profile?.org_id) {
+      throw new ForbiddenError('Usuario no asociado a ninguna organización');
     }
 
-    // Buscar el documento
-    const { data, error } = await supabase
+    const organizationId = profile.org_id as string;
+
+    let documentId = url.searchParams.get('id');
+    let cufe = url.searchParams.get('cufe');
+    if (!documentId && !cufe && req.method === 'POST') {
+      try {
+        const body = (await req.json()) as { documentId?: string; id?: string };
+        documentId = body.documentId ?? body.id ?? undefined;
+      } catch {
+        // ignore parse error
+      }
+    }
+    if (!documentId && !cufe) {
+      throw new ValidationError('Se requiere el parámetro id o cufe, o body con documentId');
+    }
+
+    // Buscar el documento por ID o CUFE
+    let query = supabase
       .from('documents')
       .select('*')
-      .eq('id', documentId)
-      .eq('organization_id', organizationId)
-      .single();
+      .eq('org_id', organizationId);
+    if (documentId) {
+      query = query.eq('id', documentId);
+    } else {
+      query = query.eq('cufe', cufe!);
+    }
+    const { data, error } = await query.single();
 
     if (error || !data) {
       throw new NotFoundError('Documento no encontrado');
@@ -53,7 +79,7 @@ serve(async (req: Request) => {
         return new Response(new Uint8Array(arrayBuffer), {
           headers: {
             'Content-Type': 'application/pdf',
-            'Content-Disposition': `inline; filename="CAFE-${documentId}.pdf"`,
+            'Content-Disposition': `inline; filename="CAFE-${record.id}.pdf"`,
             ...corsHeaders,
           },
         });
@@ -71,12 +97,12 @@ serve(async (req: Request) => {
     await supabase
       .from('documents')
       .update({ pdf_storage_path: pdfPath })
-      .eq('id', documentId);
+      .eq('id', record.id);
 
     return new Response(pdfData, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `inline; filename="CAFE-${documentId}.pdf"`,
+        'Content-Disposition': `inline; filename="CAFE-${record.id}.pdf"`,
         ...corsHeaders,
       },
     });

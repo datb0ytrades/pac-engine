@@ -77,7 +77,7 @@ export async function storeCafePdf(
     .from(PDF_BUCKET)
     .upload(path, pdfData, {
       contentType: 'application/pdf',
-      upsert: false,
+      upsert: true, // permitir regenerar PDF del mismo documento
     });
 
   if (error) {

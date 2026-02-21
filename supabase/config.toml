@@ -1,8 +1,7 @@
 # supabase/config.toml
 # Configuración del proyecto Supabase para el PAC Engine
 
-[project]
-id = "pac-engine"
+project_id = "pac-engine"
 
 [api]
 port = 54321
@@ -18,6 +17,12 @@ major_version = 15
 port = 54323
 
 # Edge Functions
+# Todas requieren JWT válido (Authorization: Bearer <token>)
+# Secrets: supabase secrets set SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=...
+# Para emit-document: SIGNING_SERVICE_URL, SIGNING_SERVICE_SECRET
+# Para categorize-expense: ANTHROPIC_API_KEY
+# Opcional: DGI_ENVIRONMENT (sandbox|production)
+
 [functions.emit-document]
 verify_jwt = true
 
@@ -31,4 +36,10 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.categorize-expense]
-verify_jwt = false
+verify_jwt = true
+
+[functions.scan-receipt]
+verify_jwt = true
+
+[functions.backfill-document-lines]
+verify_jwt = true

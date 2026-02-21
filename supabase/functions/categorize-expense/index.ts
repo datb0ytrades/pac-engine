@@ -4,9 +4,10 @@
 // Categoriza un gasto usando Claude (Anthropic API)
 // ============================================================================
 
-import { serve } from 'https://deno.land/std@0.208.0/http/server.ts';
+// Entry point: Deno.serve()
 import { corsHeaders, handleCors } from '../_shared/cors.ts';
 import { errorResponse, ValidationError } from '../_shared/errors.ts';
+import { verifyAuth } from '../_shared/auth.ts';
 
 const CATEGORIES = [
   'Alimentacion',
@@ -23,7 +24,7 @@ const CATEGORIES = [
 interface CategorizeRequest {
   merchant_name: string;
   amount: number;
-  description: string;
+  description?: string;
 }
 
 interface CategorizeResponse {
@@ -33,11 +34,14 @@ interface CategorizeResponse {
   reason: string;
 }
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   const corsResponse = handleCors(req);
   if (corsResponse) return corsResponse;
 
   try {
+    // Verificar autenticación JWT
+    await verifyAuth(req);
+
     if (req.method !== 'POST') {
       return new Response(
         JSON.stringify({ error: 'Método no permitido', code: 'METHOD_NOT_ALLOWED' }),
@@ -46,16 +50,13 @@ serve(async (req: Request) => {
     }
 
     const body = (await req.json()) as CategorizeRequest;
-    const { merchant_name, amount, description } = body;
+    const { merchant_name, amount, description = '' } = body;
 
     if (!merchant_name || typeof merchant_name !== 'string') {
       throw new ValidationError('Se requiere merchant_name');
     }
     if (typeof amount !== 'number' || amount < 0) {
       throw new ValidationError('amount debe ser un número positivo');
-    }
-    if (!description || typeof description !== 'string') {
-      throw new ValidationError('Se requiere description');
     }
 
     const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
@@ -68,7 +69,7 @@ serve(async (req: Request) => {
 Gasto:
 - Comercio/comerciante: ${merchant_name}
 - Monto: ${amount}
-- Descripción: ${description}
+${description ? `- Descripción: ${description}` : ''}
 
 Categorías posibles (debes elegir UNA): ${CATEGORIES.join(', ')}
 

@@ -1,6 +1,7 @@
 import express from 'express';
 import { env } from './config/env';
 import { requestLoggerMiddleware } from './middleware/request-logger';
+import { corsMiddleware } from './middleware/cors';
 import { authMiddleware } from './middleware/auth';
 import { rateLimitMiddleware } from './middleware/rate-limit';
 import { errorHandlerMiddleware } from './middleware/error-handler';
@@ -11,6 +12,9 @@ const app = express();
 // --- Parsers ---
 app.use(express.json({ limit: '5mb' }));
 app.use(express.text({ type: 'application/xml', limit: '5mb' }));
+
+// --- CORS ---
+app.use(corsMiddleware);
 
 // --- Logging de requests (todas las rutas) ---
 app.use(requestLoggerMiddleware);

@@ -38,6 +38,13 @@ export class UnauthorizedError extends ApiHttpError {
   }
 }
 
+export class ForbiddenError extends ApiHttpError {
+  constructor(message = 'Acceso denegado') {
+    super(403, message, 'FORBIDDEN');
+    this.name = 'ForbiddenError';
+  }
+}
+
 export class ConflictError extends ApiHttpError {
   constructor(message: string) {
     super(409, message, 'CONFLICT');
@@ -77,11 +84,14 @@ export function errorResponse(err: unknown, corsHeaders: HeadersInit = {}): Resp
   const message = err instanceof Error ? err.message : 'Error interno del servidor';
   console.error('[ERROR]', message, err instanceof Error ? err.stack : '');
 
+  const body: Record<string, unknown> = {
+    error: 'Error interno del servidor',
+    code: 'INTERNAL_ERROR',
+    detail: message,
+  };
+
   return new Response(
-    JSON.stringify({
-      error: 'Error interno del servidor',
-      code: 'INTERNAL_ERROR',
-    }),
+    JSON.stringify(body),
     {
       status: 500,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
