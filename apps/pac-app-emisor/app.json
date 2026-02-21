@@ -4,6 +4,34 @@
     "slug": "pac-app-emisor",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "pac-emisor"
+    "scheme": "pac-emisor",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "bundleIdentifier": "com.pac.emisor",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Permite acceder a la cámara para capturar documentos fiscales"
+      }
+    },
+    "android": {
+      "package": "com.pac.emisor",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "owner": "gigisabbia",
+    "extra": {
+      "eas": {
+        "projectId": "56f7b46f-98b0-418a-9a91-9edfbbd540f9"
+      }
+    }
   }
 }

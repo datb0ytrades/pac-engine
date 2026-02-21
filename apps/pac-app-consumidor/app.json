@@ -5,11 +5,45 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "pac-consumidor",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "bundleIdentifier": "com.pac.consumidor",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Permite acceder a la cámara para fotografiar recibos",
+        "NSPhotoLibraryUsageDescription": "Permite seleccionar fotos de recibos desde la galería"
+      }
+    },
+    "android": {
+      "package": "com.pac.consumidor",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
     "plugins": [
       [
         "expo-image-picker",
-        { "cameraPermission": "Permite acceder a la cámara para fotografiar recibos" }
+        {
+          "cameraPermission": "Permite acceder a la cámara para fotografiar recibos"
+        }
       ]
-    ]
+    ],
+    "owner": "gigisabbia",
+    "extra": {
+      "eas": {
+        "projectId": "56b01ab0-26a4-433d-9576-2ea43d76eb8f"
+      }
+    }
   }
 }
